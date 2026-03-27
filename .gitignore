@@ -1,10 +1,13 @@
 # Personal data — each user creates their own
 master-resume.yaml
 
-# Generated files
-output/
-jobs/
-imports/
+# Generated files — ignore contents but keep directories via .gitkeep
+output/*
+!output/.gitkeep
+jobs/*
+!jobs/.gitkeep
+imports/*
+!imports/.gitkeep
 
 # OS
 .DS_Store
