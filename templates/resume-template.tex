@@ -1,0 +1,146 @@
+%-------------------------
+% ATS-Friendly Resume Template
+% Overleaf Compatible - XeLaTeX or pdfLaTeX
+%-------------------------
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-0.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Section formatting - ATS-friendly standard headings
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule\vspace{-5pt}]
+
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{#1\vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeRole}[2]{
+  \vspace{2pt}
+  \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textit{\small#1} & \textit{\small #2} \\
+  \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+% BEGIN DOCUMENT
+%-------------------------------------------
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    \textbf{\Huge \scshape <<NAME>>} \\ \vspace{1pt}
+    \small <<PHONE>> $|$
+    \href{mailto:<<EMAIL>>}{<<EMAIL>>} $|$
+    \href{https://<<LINKEDIN>>}{<<LINKEDIN>>} $|$
+    \href{https://<<GITHUB>>}{<<GITHUB>>}
+\end{center}
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {<<COMPANY_1>>}{<<DATE_RANGE_1>>}
+      {<<TITLE_1>>}{<<LOCATION_1>>}
+
+      % Role sub-entries go here
+      \resumeRole{<<ROLE_1A_TITLE>>}{<<ROLE_1A_DATES>>}
+      \resumeItemListStart
+        \resumeItem{<<BULLET>>}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------
+\section{Projects}
+  \resumeSubHeadingListStart
+
+    \resumeProjectHeading
+      {\textbf{<<PROJECT_NAME>>} $|$ \emph{<<TECH_STACK>>}}{<<YEAR>>}
+      \resumeItemListStart
+        \resumeItem{<<BULLET>>}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {<<INSTITUTION>>}{<<DATES>>}
+      {<<DEGREE>>}{<<GPA>>}
+
+  \resumeSubHeadingListEnd
+
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+  \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+      \textbf{Languages}{: <<LANGUAGES>>} \\
+      \textbf{Frameworks}{: <<FRAMEWORKS>>} \\
+      \textbf{Databases}{: <<DATABASES>>} \\
+      \textbf{Tools}{: <<TOOLS>>}
+    }}
+  \end{itemize}
+
+%-----------ACHIEVEMENTS-----------
+\section{Achievements}
+  \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+      \textbf{<<ACHIEVEMENT_TITLE>>}: <<DETAIL>> \hfill <<YEAR>>
+    }}
+  \end{itemize}
+
+%-------------------------------------------
+\end{document}

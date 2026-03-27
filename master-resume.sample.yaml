@@ -1,0 +1,122 @@
+# =============================================================================
+# master-resume.yaml — Your complete career data
+# =============================================================================
+# This file is the single source of truth for all your resume content.
+# The tailoring workflow selects and rewrites from this data for each job.
+#
+# HOW TO SET UP:
+#   Option A: Copy this file to master-resume.yaml and fill in your details
+#   Option B: Say "Import resume" to Claude and provide your existing resume
+#             (PDF or plain text) — it will generate this file for you
+#
+# TIPS:
+#   - Include ALL experience, even if some roles seem irrelevant — the
+#     tailoring workflow picks the best matches per job description
+#   - Bullets should capture the full scope of what you did; they'll be
+#     rewritten and trimmed during tailoring
+#   - Keywords help the matcher find relevant experience quickly
+# =============================================================================
+
+contact:
+  name: "Your Full Name"
+  phone: "+1-555-123-4567"
+  email: "your.email@example.com"
+  linkedin: "linkedin.com/in/your-profile"
+  github: "github.com/your-username"
+
+experience:
+  # Group multiple roles at the same company under one entry.
+  # The top-level title/dates represent the overall tenure.
+  - company: "Company Name"
+    title: "Most Recent Title"
+    location: "City, Country"
+    start: Jan 2022
+    end: Present
+    roles:
+      - team: "Team or Department Name"    # Leave "" if not applicable
+        title: "Your Title"
+        start: Jun 2023
+        end: Present
+        bullets:
+          - "Describe what you accomplished — start with a strong action verb"
+          - "Quantify impact where possible (%, users, time saved, scale)"
+          - "Follow the XYZ formula: Accomplished [X] as measured by [Y] by doing [Z]"
+        keywords:
+          - relevant technology
+          - domain term
+          - methodology
+
+      - team: "Previous Team"
+        title: "Previous Title"
+        start: Jan 2022
+        end: May 2023
+        bullets:
+          - "Another accomplishment with measurable impact"
+        keywords:
+          - keyword1
+          - keyword2
+
+  # Add more companies as needed
+  # - company: "Another Company"
+  #   title: "Title"
+  #   location: "City, Country"
+  #   start: Mon YYYY
+  #   end: Mon YYYY
+  #   roles:
+  #     - team: ""
+  #       title: "Title"
+  #       start: Mon YYYY
+  #       end: Mon YYYY
+  #       bullets:
+  #         - "Accomplishment"
+  #       keywords:
+  #         - keyword
+
+projects:
+  - name: "Project Name"
+    tech: [Technology1, Technology2, Technology3]
+    year: 2024
+    bullets:
+      - "What the project does and what you built"
+      - "Technical details and impact"
+    keywords:
+      - relevant keyword
+      - technology term
+
+  # Add more projects as needed
+  # - name: "Another Project"
+  #   tech: [Tech1, Tech2]
+  #   year: 2023
+  #   bullets:
+  #     - "Description"
+  #   keywords:
+  #     - keyword
+
+education:
+  - institution: "University Name"
+    degree: "Master of Science in Computer Science"
+    start: 2020
+    end: 2022
+    gpa: "3.8/4.0"    # Omit this line if you prefer not to include GPA
+
+  - institution: "Another University"
+    degree: "Bachelor of Technology in Computer Science"
+    start: 2016
+    end: 2020
+    gpa: "9.0/10"
+
+skills:
+  languages: [Java, Python, JavaScript, TypeScript, SQL]
+  frameworks: [Spring Boot, React, Node.js, Django]
+  databases: [PostgreSQL, MongoDB, Redis, MySQL]
+  tools: [Docker, AWS, Git, Jenkins, "CI/CD"]
+
+achievements:
+  - title: "Award or Certification Name"
+    detail: "Supporting detail (issuer, placement, ID number, etc.)"
+    year: 2023
+
+  # Add more achievements as needed
+  # - title: "Another Achievement"
+  #   detail: "Details"
+  #   year: 2022

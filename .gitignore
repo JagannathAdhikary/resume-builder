@@ -1,0 +1,10 @@
+# Personal data — each user creates their own
+master-resume.yaml
+
+# Generated files
+output/
+jobs/
+imports/
+
+# OS
+.DS_Store
