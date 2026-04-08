@@ -8,6 +8,11 @@ jobs/*
 !jobs/.gitkeep
 imports/*
 !imports/.gitkeep
+searches/*
+!searches/.gitkeep
 
 # OS
 .DS_Store
+
+# Python virtual environment
+.venv/

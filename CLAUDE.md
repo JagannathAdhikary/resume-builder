@@ -22,7 +22,11 @@ resume-builder/
 │   └── <company>-<role>.txt     # Job descriptions (user pastes these)
 ├── output/
 │   └── <company>-<role>.tex     # Generated tailored resumes
-└── imports/                     # (Optional) Source resumes for import (PDF/text)
+├── imports/                     # (Optional) Source resumes for import (PDF/text)
+├── scripts/
+│   └── search_jobs.py           # Job search script (wraps python-jobspy)
+├── searches/                    # Scraped job results (gitignored)
+└── requirements.txt             # Python dependencies (for job search)
 ```
 
 ## Workflow: How to Tailor a Resume
@@ -328,6 +332,138 @@ You can now use "Tailor for [JD]" to generate a tailored resume from this data.
 - **Consistent date formatting**: Mon YYYY – Mon YYYY
 - **No special characters** that might break ATS parsing
 
+## Workflow: Search for Jobs
+
+When the user asks to "search jobs", "find jobs", "find jobs for [role]", or provides job search criteria:
+
+### Step 1: Gather Search Criteria
+
+If the user hasn't provided all details, ask using AskUserQuestion:
+- **Search term** (required): e.g., "software engineer", "backend developer", "full stack engineer"
+- **Location** (optional): e.g., "Bengaluru, India", "San Francisco, CA", "Remote"
+- **Job sites** (optional): default is linkedin,indeed,google. Options: linkedin, indeed, google, glassdoor, zip_recruiter
+- **Additional filters** (optional): job type (fulltime/parttime/contract/internship), remote-only, posting age in hours (default 72)
+
+### Step 2: Run the Search Script
+
+Execute the search:
+```bash
+python3 scripts/search_jobs.py \
+  --search-term "<term>" \
+  --location "<location>" \
+  --sites <sites> \
+  --results 25 \
+  --hours-old <hours> \
+  [--remote] [--job-type <type>] [--country <country>]
+```
+
+**If Python 3.10+ is not available**, inform the user:
+> "The job search feature requires Python 3.10+. Install it via `brew install python@3.12` or `pyenv install 3.12`, then set up dependencies: `python3.12 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`"
+
+**If using a virtual environment**, use `.venv/bin/python3` instead of `python3`.
+
+**If the script fails** due to rate limiting or network issues, suggest:
+- Reducing `--results` to 10
+- Searching one site at a time (e.g., `--sites indeed`)
+- Trying again after a brief wait
+
+### Step 3: Confirm Results
+
+After the script runs, read the generated JSON file from `searches/` and report:
+```
+=== JOB SEARCH RESULTS ===
+Search:    <search term>
+Location:  <location>
+Sources:   <sites>
+Found:     <N> jobs
+Saved to:  searches/<filename>.json
+
+Say "Match jobs" to score and rank results against your profile.
+```
+
+## Workflow: Match Jobs Against Profile
+
+When the user asks to "match jobs", "rank jobs", "score jobs", or "which jobs fit me":
+
+### Step 1: Load Data
+
+- Read the most recent JSON file in `searches/` (or a specific file if the user names one)
+- Read `master-resume.yaml`
+
+### Step 2: Score Each Job
+
+For each job with a non-empty description, calculate a fit score (out of 100) using these weighted criteria:
+
+#### Scoring Rubric
+
+| Criterion | Weight | How to Score |
+|-----------|--------|--------------|
+| **Skill Match** | 35 pts | Count skills/technologies in JD that appear in master-resume `skills` section OR experience/project `keywords`. Score = (matched / total_jd_skills) × 35 |
+| **Tech Stack Alignment** | 25 pts | Check if the JD's primary stack (e.g., "Java + Spring Boot + PostgreSQL") aligns with candidate's strongest technologies (most bullets/keywords). Score = (aligned_primary / total_primary) × 25 |
+| **Experience Level Match** | 20 pts | Compare JD seniority signals (years required, "senior"/"junior"/"lead" in title) against candidate's experience. Full match = 20, adjacent level = 12, mismatch = 5 |
+| **Domain Relevance** | 10 pts | Does the JD's industry/domain overlap with candidate's experience domains? Full overlap = 10, partial = 5, none = 2 |
+| **Location/Remote Fit** | 10 pts | Remote or candidate's current city = 10, relocation required = 5, unclear = 7 |
+
+**Scoring Guidelines:**
+- Match skills case-insensitively with common aliases (e.g., "JS" = "JavaScript", "Postgres" = "PostgreSQL", "k8s" = "Kubernetes")
+- Weigh technologies appearing in multiple experience roles/projects more heavily — these are strongest skills
+- Jobs with no description get score 0 and are marked "insufficient data"
+- Round final score to nearest integer
+
+### Step 3: Present Ranked Results
+
+```
+=== JOB MATCH RESULTS ===
+Based on: searches/<filename>.json
+Profile:  <candidate name> — <current title>
+
+#  | Score | Title                        | Company       | Location       | Key Matches
+---|-------|------------------------------|---------------|----------------|------------------
+1  | 87    | Full Stack Engineer           | Stripe        | Remote         | Java, Spring Boot, PostgreSQL, REST APIs
+2  | 82    | Backend Software Engineer     | Datadog       | New York, NY   | Java, distributed systems, monitoring
+3  | 74    | Software Engineer II          | Google        | Bengaluru      | full stack, large-scale systems
+...
+
+Jobs with insufficient data: <N> (no description available)
+
+Say "Tailor for job #N" to generate a tailored resume, or "Show job #N" to see full details.
+```
+
+### Step 4: Job Detail View (optional)
+
+When the user says "Show job #N":
+- Display the full job description
+- Show the detailed score breakdown (each criterion with points awarded)
+- List matched skills and gap skills
+- Provide the job URL
+
+## Workflow: Tailor for a Matched Job
+
+When the user says "Tailor for job #N" (referencing a matched job from search results):
+
+### Step 1: Retrieve the Job
+
+- Load the searches JSON file used in the most recent "Match jobs" run
+- Find job #N from the ranked list
+- Extract the full job description
+
+### Step 2: Save as Job Description
+
+Save the job description to `jobs/<company>-<role>.txt` in standard format:
+```
+Company: <company name>
+Role: <job title>
+Source: <site_name> / <job_url>
+
+---
+
+<full job description>
+```
+
+### Step 3: Bridge to Existing Tailoring Workflow
+
+Run the standard "Tailor for [JD]" workflow (Steps 1–5) using the saved JD. The existing pipeline handles everything: JD analysis, master resume matching, skill gap verification, content tailoring, LaTeX generation, and ATS match report.
+
 ## Important Constraints
 - NEVER add skills to the resume without user confirmation via Step 2.5
 - NEVER invent experience or achievements not in master-resume.yaml
@@ -348,3 +484,7 @@ When the user says:
 - "Import resume" → Run Import Resume workflow above
 - "Parse resume" → Run Import Resume workflow above
 - "Create master from [resume]" → Run Import Resume workflow above
+- "Search jobs" / "Find jobs for [role]" → Run Search for Jobs workflow
+- "Match jobs" → Run Match Jobs workflow — score and rank against profile
+- "Tailor for job #N" → Save matched job's JD, then run full tailoring workflow
+- "Show job #N" → Show full details and score breakdown for a matched job
