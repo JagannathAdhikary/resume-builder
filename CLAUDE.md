@@ -25,7 +25,7 @@ resume-builder/
 ├── imports/                     # (Optional) Source resumes for import (PDF/text)
 ├── scripts/
 │   └── search_jobs.py           # Job search script (wraps python-jobspy)
-├── searches/                    # Scraped job results (gitignored)
+├── searches/                    # Scraped job results & match results (gitignored)
 └── requirements.txt             # Python dependencies (for job search)
 ```
 
@@ -417,16 +417,64 @@ For each job with a non-empty description, calculate a fit score (out of 100) us
 Based on: searches/<filename>.json
 Profile:  <candidate name> — <current title>
 
-#  | Score | Title                        | Company       | Location       | Key Matches
----|-------|------------------------------|---------------|----------------|------------------
-1  | 87    | Full Stack Engineer           | Stripe        | Remote         | Java, Spring Boot, PostgreSQL, REST APIs
-2  | 82    | Backend Software Engineer     | Datadog       | New York, NY   | Java, distributed systems, monitoring
-3  | 74    | Software Engineer II          | Google        | Bengaluru      | full stack, large-scale systems
+#  | Score | Title                        | Company       | Location       | Key Matches                              | Apply
+---|-------|------------------------------|---------------|----------------|------------------------------------------|-------
+1  | 87    | Full Stack Engineer           | Stripe        | Remote         | Java, Spring Boot, PostgreSQL, REST APIs  | [Apply](https://...)
+2  | 82    | Backend Software Engineer     | Datadog       | New York, NY   | Java, distributed systems, monitoring     | [Apply](https://...)
+3  | 74    | Software Engineer II          | Google        | Bengaluru      | full stack, large-scale systems           | [Apply](https://...)
 ...
 
 Jobs with insufficient data: <N> (no description available)
 
 Say "Tailor for job #N" to generate a tailored resume, or "Show job #N" to see full details.
+```
+
+The Apply column uses the `job_url` field from the search JSON. Format as a clickable markdown link: `[Apply](<job_url>)`. If `job_url` is empty, show `—` instead.
+
+### Step 3.5: Save Match Results to File
+
+After presenting the ranked results to the user, persist them to a JSON file:
+
+**Filename**: `searches/matches-<source_file_stem>_<timestamp>.json`
+- `<source_file_stem>` is the name of the input search file without extension (e.g., `swe-bengaluru_2026-04-08_212938`)
+- `<timestamp>` is the current date/time formatted as `YYYY-MM-DD_HHMMSS`
+- Example: `searches/matches-swe-bengaluru_2026-04-08_212938_2026-04-09_143022.json`
+
+**File format**: A JSON array of objects, one per scored job (excluding "insufficient data" jobs), ordered by rank:
+
+```json
+[
+  {
+    "rank": 1,
+    "score": 87,
+    "title": "Full Stack Engineer",
+    "company": "Stripe",
+    "location": "Remote",
+    "site": "linkedin",
+    "job_url": "https://www.linkedin.com/jobs/view/...",
+    "key_matches": ["Java", "Spring Boot", "PostgreSQL", "REST APIs"],
+    "score_breakdown": {
+      "skill_match": 30,
+      "tech_stack": 22,
+      "experience_level": 20,
+      "domain_relevance": 8,
+      "location_fit": 7
+    }
+  }
+]
+```
+
+**Field mapping:**
+- `rank`: 1-based position in the sorted results
+- `score`: Integer total score (out of 100)
+- `title`, `company`, `location`, `site`: From the corresponding search JSON fields
+- `job_url`: From the search JSON `job_url` field (the apply/view link)
+- `key_matches`: Array of matched skill/technology strings (same as shown in the table)
+- `score_breakdown`: Object with the five scoring criteria and the points awarded for each
+
+Write the file using the Bash tool with `python3 -c` or a heredoc. Confirm to the user:
+```
+Match results saved to: searches/matches-<filename>.json
 ```
 
 ### Step 4: Job Detail View (optional)
@@ -443,9 +491,18 @@ When the user says "Tailor for job #N" (referencing a matched job from search re
 
 ### Step 1: Retrieve the Job
 
-- Load the searches JSON file used in the most recent "Match jobs" run
-- Find job #N from the ranked list
-- Extract the full job description
+1. **Check for persisted match results first**: Look for the most recent `matches-*.json` file in `searches/`. If one exists:
+   - Load it and find the entry with `"rank": N`
+   - Use its `job_url`, `title`, `company`, `site`, and `score` to identify the job
+   - Load the corresponding source search JSON file (its stem is embedded in the matches filename, between `matches-` and the second timestamp) to retrieve the full job `description`
+   - This avoids re-scoring and ensures rank numbers are stable from the user's last "Match jobs" output
+
+2. **Fallback — no match file available**: If no `matches-*.json` exists (e.g., the match file was deleted, or the user is in a new session referencing old results):
+   - Load the most recent raw search JSON file in `searches/`
+   - Re-run the scoring rubric from Step 2 of "Match Jobs" to identify job #N
+   - Warn the user: "No saved match results found — re-scoring from raw search data. Rankings may differ slightly."
+
+3. **Extract the full job description** from the source search JSON using the `job_url` or `title`+`company` as the lookup key
 
 ### Step 2: Save as Job Description
 
@@ -485,6 +542,6 @@ When the user says:
 - "Parse resume" → Run Import Resume workflow above
 - "Create master from [resume]" → Run Import Resume workflow above
 - "Search jobs" / "Find jobs for [role]" → Run Search for Jobs workflow
-- "Match jobs" → Run Match Jobs workflow — score and rank against profile
+- "Match jobs" → Run Match Jobs workflow — score, rank, and save results to file
 - "Tailor for job #N" → Save matched job's JD, then run full tailoring workflow
 - "Show job #N" → Show full details and score breakdown for a matched job
